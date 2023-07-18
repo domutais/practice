@@ -8,7 +8,6 @@ import io.jsondb.annotation.Secret;
 public class StudentDataInstance {
 
     @Id
-    @Secret
     private String email;
 
     @Secret

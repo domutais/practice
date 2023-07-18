@@ -1,4 +1,4 @@
-package server;
+package database;
 
 import java.io.*;
 import java.nio.file.FileSystem;
@@ -20,13 +20,13 @@ public class DocumentFiller {
         else this.templateZip = new File(templatePath);
     }
 
-    public void fill(Map<String, String> tokens) throws Exception {
+    public File fill(Map<String, String> tokens) throws Exception {
         zipUnpack();
 
         FileReader fr = new FileReader(template);
         Scanner sc = new Scanner(fr);
 
-        File xml = new File("tmp/document.xml");
+        File xml = new File("src/document.xml");
         xml.createNewFile();
         FileWriter fw = new FileWriter(xml);
         while (sc.hasNextLine()) {
@@ -43,8 +43,11 @@ public class DocumentFiller {
         fr.close();
         fw.close();
 
-        File docx = new File("src/"+tokens.get("email")+".docx");
+        File docx = new File("src/"+tokens.get("ST_email")+".docx");
         zipPack(xml, docx);
+
+        //xml.delete();
+        return docx;
 
     }
 

@@ -9,6 +9,9 @@ import java.util.GregorianCalendar;
 
 @Document(collection = "general_data", schemaVersion = "1.0")
 public class GeneralDataInstance {
+    //List of methods to fully define an instance:
+    /*.set
+     */
     @Id
     private int id;
 

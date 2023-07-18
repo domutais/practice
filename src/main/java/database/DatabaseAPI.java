@@ -4,7 +4,12 @@ import io.jsondb.JsonDBTemplate;
 import io.jsondb.crypto.Default1Cipher;
 import io.jsondb.crypto.ICipher;
 
-import java.util.*;
+import java.io.File;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public abstract class DatabaseAPI {
     private static final String dbPath = "C:/PracticeDB/";
@@ -13,7 +18,7 @@ public abstract class DatabaseAPI {
     static {
         ICipher c = null;
         try {
-            c = new Default1Cipher("dsfsdkfgsdhgfjda;sd");
+            c = new Default1Cipher("dsfsdkfgsdhgfjdatrtryy");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -22,7 +27,29 @@ public abstract class DatabaseAPI {
     } // initialize using try-catch
 
     private static final JsonDBTemplate database = new JsonDBTemplate(dbPath, baseScanPackage, cipher);
+    static { // create instances if needed
+        try{
+            database.createCollection(GeneralDataInstance.class);
+        }
+        catch (Exception e) {
 
+        }
+
+        try {
+            database.createCollection(StudentDataInstance.class);
+        }
+        catch (Exception e) {
+
+        }
+
+    }
+
+    public static void upsert(GeneralDataInstance gdi) {
+        database.upsert(gdi);
+    }
+    public static void upsert(StudentDataInstance sdi) {
+        database.upsert(sdi);
+    }
     public static void insert(GeneralDataInstance gdi) {
         database.insert(gdi, "general_data");
     }
@@ -39,12 +66,13 @@ public abstract class DatabaseAPI {
         database.remove(gdi, "students");
     }
 
-    public static Map<String, String> getTokens(String email) {
+    public static Map<String, String> getTokens(int id, String email) {
         Map<String, String> ret = new HashMap<>();
         StudentDataInstance student = database.findById(email, StudentDataInstance.class);
-        GeneralDataInstance data = database.findById(0, GeneralDataInstance.class);
+        GeneralDataInstance data = database.findById(id, GeneralDataInstance.class);
 
-        ret.put("GEN_companyName", data.getCompanyName());
+
+        ret.put("GEN_compName", data.getCompanyName());
         ret.put("GEN_uniName", data.getUniName());
         ret.put("GEN_startD", String.valueOf(data.getStartDate().get(Calendar.DAY_OF_MONTH)));
         ret.put("GEN_startM", monthToString(data.getStartDate()));
@@ -63,6 +91,7 @@ public abstract class DatabaseAPI {
         ret.put("GEN_dept", data.getDepartmentName());
         ret.put("GEN_fac", data.getFacultyName());
 
+        ret.put("ST_email", student.getEmail());
         ret.put("ST_name", student.getName());
         ret.put("ST_deg", student.getDegree());
         ret.put("ST_dir", student.getDirection());
@@ -94,5 +123,10 @@ public abstract class DatabaseAPI {
         if (month == Calendar.NOVEMBER) return "листопада";
         if (month == Calendar.DECEMBER) return "грудня";
         return "";
+    }
+
+    public static File fillDocx(int id, String email) throws Exception {
+        DocumentFiller df = new DocumentFiller("src/template.docx");
+        return df.fill(getTokens(id, email));
     }
 }
